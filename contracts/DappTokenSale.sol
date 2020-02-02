@@ -30,7 +30,7 @@ contract DappTokenSale {
 
     function buyTokens(uint256 _numberOfTokens) public payable {
         //Require that value is equal to tokens
-        require(msg.value == multiply(_numberOfTokens,tokenPrice));
+        require(msg.value == multiply(_numberOfTokens,tokenPrice),"Value in wei is equal to number of tokens");
         //Require that contract has enough tokens
         require(tokenContract.balanceOf(address(this)) >= _numberOfTokens,
         'cannot transfer more tokens than available');
@@ -40,5 +40,15 @@ contract DappTokenSale {
         tokensSold += _numberOfTokens;
         //Trigger sell event
         emit Sell(msg.sender,_numberOfTokens);
+    }
+
+    function endSale() public payable{
+        //Require admin
+        require(msg.sender == admin, "must be admin to end sale");
+        //Transfering remaining dapp tokens to the admin
+        require(tokenContract.transfer(admin, tokenContract.balanceOf(address(this))),
+        "transfers remaining tokens back to admin");
+        //Destroy Contract
+        selfdestruct(msg.sender);
     }
 }
